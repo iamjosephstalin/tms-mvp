@@ -1,10 +1,16 @@
 import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
-  LayoutDashboard, Users, Phone, FileText,
-  LogOut, BarChart3, List, X, UserPlus
+  LayoutDashboard,
+  Users,
+  BarChart3,
+  Settings,
+  LogOut,
+  List,
+  UserPlus,
+  Briefcase
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,118 +18,86 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { currentUser, logout } = useApp();
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { logout, currentUser } = useApp();
 
-  if (!currentUser) return null;
-
-  const isActive = (path: string) => location.pathname === path
-    ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500'
-    : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border-r-2 border-transparent';
-
-  const handleLinkClick = () => {
-    // Close sidebar on mobile when a link is clicked
-    if (window.innerWidth < 768) {
-      onClose();
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
+  const isActive = (path: string) => {
+    return pathname === path
+      ? 'text-white bg-zinc-800/50 border-l-2 border-indigo-500' // Active: Black/Grey bg, White text, Indigo Indicator
+      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 border-l-2 border-transparent'; // Inactive: Muted text
+  };
+
+  const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+    <Link
+      to={to}
+      onClick={onClose}
+      className={`flex items-center gap-3 px-4 py-2 text-sm font-medium transition-all duration-200 group ${isActive(to)}`}
+    >
+      <Icon size={16} className={`group-hover:text-indigo-400 transition-colors ${pathname === to ? 'text-indigo-500' : ''}`} />
+      <span>{label}</span>
+      {pathname === to && (
+        <div className="ml-auto w-1 h-1 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
+      )}
+    </Link>
+  );
+
   return (
-    <div className={`
-      fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-white flex flex-col h-full transition-transform duration-300 ease-in-out shadow-2xl
-      md:translate-x-0 md:static md:shadow-none
-      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-    `}>
-      <div className="p-6 border-b border-slate-800 flex justify-between items-center shrink-0">
-        <h1 className="text-lg font-bold flex items-center gap-3 tracking-tight">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/50">
-            <Phone className="text-white" size={18} />
-          </div>
-          <span className="text-white">TMS <span className="text-slate-500 font-normal">CRM</span></span>
-        </h1>
-        <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white transition-colors">
-          <X size={24} />
-        </button>
+    <aside
+      className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-zinc-950 border-r border-zinc-800 transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:relative md:translate-x-0 flex flex-col
+      `}
+    >
+      {/* Brand */}
+      <div className="h-14 flex items-center px-6 border-b border-zinc-800">
+        <div className="flex items-center gap-2 text-white font-bold tracking-tight">
+          <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-xs">T</div>
+          <span className="text-lg">TMS<span className="text-zinc-600 font-normal">.ent</span></span>
+        </div>
       </div>
 
-      <nav className="flex-1 py-6 space-y-1 overflow-y-auto">
-        <Link
-          to="/"
-          onClick={handleLinkClick}
-          className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/')}`}
-        >
-          <LayoutDashboard size={18} />
-          <span className="text-sm font-medium">Dashboard</span>
-        </Link>
+      {/* Navigation */}
+      <nav className="flex-1 py-6 space-y-1">
+        <div className="px-4 mb-2 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest">Platform</div>
 
-        <Link
-          to="/leads"
-          onClick={handleLinkClick}
-          className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/leads')}`}
-        >
-          <List size={18} />
-          <span className="text-sm font-medium">Leads Pipeline</span>
-        </Link>
+        <NavItem to="/" icon={LayoutDashboard} label="Overview" />
+        <NavItem to="/leads" icon={List} label="All Leads" />
 
-        {currentUser.role !== 'telecaller' && (
+        {currentUser && currentUser.role !== 'telecaller' && (
           <>
-            <Link
-              to="/reports"
-              onClick={handleLinkClick}
-              className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/reports')}`}
-            >
-              <BarChart3 size={18} />
-              <span className="text-sm font-medium">Analytics</span>
-            </Link>
+            <div className="px-4 mt-6 mb-2 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest">Management</div>
+            <NavItem to="/reports" icon={BarChart3} label="Analytics" />
+            <NavItem to="/lead-assignment" icon={UserPlus} label="Assignments" />
+
             {currentUser.role === 'admin' && (
-              <Link
-                to="/agents"
-                onClick={handleLinkClick}
-                className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/agents')}`}
-              >
-                <Users size={18} />
-                <span className="text-sm font-medium">My Agents</span>
-              </Link>
+              <NavItem to="/agents" icon={Users} label="My Team" />
             )}
             {currentUser.role === 'superadmin' && (
-              <Link
-                to="/admin"
-                onClick={handleLinkClick}
-                className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/admin')}`}
-              >
-                <Users size={18} />
-                <span className="text-sm font-medium">Team & Target</span>
-              </Link>
+              <NavItem to="/admin" icon={Briefcase} label="Organization" />
             )}
-            <Link
-              to="/lead-assignment"
-              onClick={handleLinkClick}
-              className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/lead-assignment')}`}
-            >
-              <UserPlus size={18} />
-              <span className="text-sm font-medium">Lead Assignment</span>
-            </Link>
           </>
         )}
       </nav>
 
-      <div className="p-4 border-t border-slate-800 bg-[#0F172A] shrink-0">
-        <div className="flex items-center gap-3 mb-4 px-2 p-2 rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer group">
-          <img src={currentUser.avatar} alt="Profile" className="w-9 h-9 rounded-full bg-slate-700 border-2 border-slate-600 group-hover:border-slate-400 transition-colors" />
-          <div className="overflow-hidden">
-            <p className="text-sm font-semibold truncate text-slate-200 group-hover:text-white">{currentUser.name}</p>
-            <p className="text-xs text-slate-500 truncate capitalize">{currentUser.role}</p>
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="p-4 border-t border-zinc-800">
+        <NavItem to="/settings" icon={Settings} label="Settings" />
         <button
-          onClick={logout}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 w-full text-red-400 hover:bg-red-950/20 hover:text-red-300 rounded-lg transition-colors text-sm font-medium"
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-950/30 transition-all border-l-2 border-transparent mt-1"
         >
           <LogOut size={16} />
           <span>Sign Out</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 };
 
