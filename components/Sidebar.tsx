@@ -58,8 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Brand */}
       <div className="h-14 flex items-center px-6 border-b border-zinc-800">
         <div className="flex items-center gap-2 text-white font-bold tracking-tight">
-          <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-xs">T</div>
-          <span className="text-lg">TMS<span className="text-zinc-600 font-normal">.ent</span></span>
+          <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-xs">D</div>
+          <span className="text-lg">DialFi<span className="text-zinc-600 font-normal">.ent</span></span>
         </div>
       </div>
 

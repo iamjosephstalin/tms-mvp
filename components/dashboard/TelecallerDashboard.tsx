@@ -74,7 +74,7 @@ const CreateLeadModal = ({ onClose }: { onClose: () => void }) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 my-auto max-h-[90vh] overflow-y-auto">
         <div className="p-4 border-b bg-gray-50 flex justify-between items-center sticky top-0 bg-gray-50 z-10">
           <h3 className="font-bold text-gray-900">Create New Lead</h3>
-          <button onClick={onClose}><X size={20} className="text-gray-400 hover:text-gray-600" /></button>
+          <button onClick={onClose}><X size={20} className="text-zinc-400 hover:text-zinc-600" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -210,21 +210,46 @@ const TelecallerDashboard = () => {
   // Lead Modal State
   const [isLeadModalOpen, setIsLeadModalOpen] = React.useState(false);
 
-  return (
-    <div className="space-y-6">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Workspace</h1>
-          <p className="text-gray-500">Daily tasks and lead management.</p>
-        </div>
+  // --- DATE FILTER ---
+  const [selectedMonth, setSelectedMonth] = React.useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
 
-        <button
-          onClick={() => setIsLeadModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm flex items-center gap-2 font-medium"
-        >
-          <ListTodo size={18} /> Create New Lead
-        </button>
+  const filteredMyLeads = myLeads.filter(l => l.createdAt.startsWith(selectedMonth));
+  const completedLeads = myLeads.filter(l => ['sanctioned', 'disbursed'].includes(l.status)); // Define completedLeads
+  const filteredCompletedLeads = completedLeads.filter(l => l.createdAt.startsWith(selectedMonth));
+  const allFollowups = myLeads.flatMap(lead => lead.followups.map(f => ({ ...f, leadName: lead.name, leadId: lead.id }))); // Define allFollowups
+  const filteredFollowups = allFollowups.filter(f => f.date.startsWith(selectedMonth));
+
+  // Update Metrics based on filtered data
+  const totalCallsFiltered = filteredMyLeads.reduce((acc, lead) => acc + lead.remarks.length, 0); // Mock approximation
+  const pendingFollowupsCount = filteredFollowups.filter(f => f.status === 'pending').length; // Corrected to use filteredFollowups
+  const docsPendingCount = filteredMyLeads.filter(l => l.status === 'docs-pending').length;
+  const earnings = filteredCompletedLeads.length * 500; // Mock incentive
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+      {/* Header & Date Filter */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome back, {currentUser?.name}</h1>
+          <p className="text-slate-500">Here's your performance summary for <span className="font-semibold text-slate-700">{new Date(selectedMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</span>.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar size={16} className="text-slate-400" />
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm"
+          />
+        </div>
       </div>
+
+      <button
+        onClick={() => setIsLeadModalOpen(true)}
+        className="btn btn-primary flex items-center gap-2"
+      >
+        <ListTodo size={18} /> Create New Lead
+      </button>
 
       {/* KPI Cards: Schedule, Assigned, Daily Leads, Actioned/Unactioned */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -387,7 +412,7 @@ const TelecallerDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

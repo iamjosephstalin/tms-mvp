@@ -15,7 +15,7 @@ const Header = () => {
 
             {/* Left: Breadcrumbs */}
             <div className="flex items-center text-sm font-medium text-muted-foreground">
-                <span className="text-foreground">TMS</span>
+                <span className="text-foreground">DialFi</span>
                 {pathSegments.map((segment, index) => (
                     <React.Fragment key={segment}>
                         <span className="mx-2 text-zinc-300">/</span>

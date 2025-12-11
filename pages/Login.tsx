@@ -26,8 +26,8 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold">T</div>
-            <span className="text-xl font-bold tracking-tight">TMS Enterprise</span>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold">D</div>
+            <span className="text-xl font-bold tracking-tight">DialFi Enterprise</span>
           </div>
         </div>
 
@@ -95,9 +95,9 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold hover:bg-slate-800 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              className="w-full btn btn-primary h-10 text-base"
             >
-              Sign In <ArrowRight size={18} />
+              Sign In <ArrowRight size={18} className="ml-2" />
             </button>
           </form>
 

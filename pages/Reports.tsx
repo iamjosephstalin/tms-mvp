@@ -150,8 +150,8 @@ const Reports = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports Generator</h1>
-          <p className="text-gray-500">Generate detailed insights and export data.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Reports Generator</h1>
+          <p className="text-slate-500">Generate detailed insights and export data.</p>
         </div>
 
         <div className="flex gap-2">
@@ -162,8 +162,8 @@ const Reports = () => {
       <div className="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden">
 
         {/* Sidebar - Report Types */}
-        <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto lg:overflow-y-auto shrink-0 flex lg:flex-col">
-          <div className="p-4 bg-gray-50 border-r lg:border-r-0 lg:border-b border-gray-200 font-semibold text-gray-700 shrink-0 lg:w-full flex items-center lg:block whitespace-nowrap sticky left-0 z-10">
+        <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto lg:overflow-y-auto shrink-0 flex lg:flex-col">
+          <div className="p-4 bg-slate-50 border-r lg:border-r-0 lg:border-b border-slate-200 font-semibold text-slate-700 shrink-0 lg:w-full flex items-center lg:block whitespace-nowrap sticky left-0 z-10">
             Report Types
           </div>
           <div className="p-2 flex lg:flex-col gap-1 min-w-max lg:min-w-0">
@@ -171,7 +171,7 @@ const Reports = () => {
               <button
                 key={rtype.id}
                 onClick={() => setActiveReport(rtype.id as ReportType)}
-                className={`text-left p-3 rounded-lg text-sm transition-colors whitespace-nowrap lg:whitespace-normal min-w-[200px] lg:min-w-0 ${activeReport === rtype.id ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-left p-3 rounded-lg text-sm transition-colors whitespace-nowrap lg:whitespace-normal min-w-[200px] lg:min-w-0 ${activeReport === rtype.id ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'text-slate-600 hover:bg-slate-50'}`}
               >
                 <div className="font-semibold">{rtype.label}</div>
                 <div className="text-xs opacity-70 mt-1 line-clamp-1 hidden lg:block">{rtype.desc}</div>
@@ -181,17 +181,17 @@ const Reports = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
 
           {/* Filter Bar */}
-          <div className="p-4 border-b border-gray-200 flex flex-wrap gap-4 items-center bg-gray-50">
-            <div className="flex items-center gap-2 text-gray-700 font-medium">
+          <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center bg-slate-50">
+            <div className="flex items-center gap-2 text-slate-700 font-medium">
               <Filter size={18} /> Filters:
             </div>
 
             <div className="relative">
               <select
-                className="pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                className="pl-3 pr-8 py-1.5 text-sm border border-slate-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
               >
@@ -204,7 +204,7 @@ const Reports = () => {
 
             <div className="relative">
               <select
-                className="pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                className="pl-3 pr-8 py-1.5 text-sm border border-slate-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                 value={selectedAgent}
                 onChange={(e) => setSelectedAgent(e.target.value)}
               >
@@ -218,7 +218,7 @@ const Reports = () => {
             {activeReport === 'conversion' && (
               <div className="relative">
                 <select
-                  className="pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                  className="pl-3 pr-8 py-1.5 text-sm border border-slate-300 rounded-md outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                 >
@@ -229,7 +229,7 @@ const Reports = () => {
               </div>
             )}
 
-            <div className="ml-auto text-sm text-gray-500">
+            <div className="ml-auto text-sm text-slate-500">
               Showing {reportData.length} records
             </div>
           </div>
@@ -238,10 +238,10 @@ const Reports = () => {
           <div className="flex-1 overflow-auto p-0 relative">
             <div className="absolute inset-0 overflow-auto">
               <table className="w-full text-left text-sm border-collapse min-w-[800px] lg:min-w-0">
-                <thead className="bg-gray-50 text-gray-500 sticky top-0 z-10 shadow-sm">
+                <thead className="bg-slate-50 text-slate-500 sticky top-0 z-10 shadow-sm">
                   <tr>
                     {reportData.length > 0 ? Object.keys(reportData[0]).map(key => (
-                      <th key={key} className="px-6 py-3 font-medium capitalize border-b border-gray-200 whitespace-nowrap bg-gray-50">
+                      <th key={key} className="px-6 py-3 font-medium capitalize border-b border-slate-200 whitespace-nowrap bg-slate-50">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </th>
                     )) : (
@@ -249,12 +249,12 @@ const Reports = () => {
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100">
                   {reportData.length > 0 ? (
                     reportData.map((row: any, idx: number) => (
                       <tr key={idx} className="hover:bg-blue-50/50">
                         {Object.values(row).map((val: any, i) => (
-                          <td key={i} className="px-6 py-3 text-gray-700 whitespace-nowrap">
+                          <td key={i} className="px-6 py-3 text-slate-700 whitespace-nowrap">
                             {val}
                           </td>
                         ))}

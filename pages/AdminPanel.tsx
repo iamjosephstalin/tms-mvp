@@ -15,7 +15,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }: { isOpen: boolean; onClose: ()
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <h3 className="font-bold text-gray-800">Add New Team Member</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+          <button onClick={onClose} className="btn btn-ghost btn-icon"><X size={20} /></button>
         </div>
         <div className="p-6 space-y-4">
           <div>
@@ -41,13 +41,13 @@ const AddUserModal = ({ isOpen, onClose, onAdd }: { isOpen: boolean; onClose: ()
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setRole('telecaller')}
-                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-colors ${role === 'telecaller' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-colors ${role === 'telecaller' ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-input text-zinc-600 hover:bg-zinc-50'}`}
               >
                 <Phone size={16} /> Telecaller
               </button>
               <button
                 onClick={() => setRole('admin')}
-                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-colors ${role === 'admin' ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-colors ${role === 'admin' ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-input text-zinc-600 hover:bg-zinc-50'}`}
               >
                 <Settings size={16} /> Team Lead
               </button>
@@ -62,7 +62,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }: { isOpen: boolean; onClose: ()
               }
             }}
             disabled={!name || !email}
-            className="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn btn-primary mt-4"
           >
             Create User
           </button>

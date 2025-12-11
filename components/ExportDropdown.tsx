@@ -29,7 +29,7 @@ const ExportDropdown: React.FC<ExportDropdownProps> = ({ onExport, className = '
         <div className={`relative ${className}`} ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                className="btn btn-secondary gap-2"
             >
                 <Download size={16} />
                 <span>Export</span>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Users, FileText, CheckCircle, Clock, IndianRupee, TrendingUp, BarChart2 } from 'lucide-react';
+import { Users, FileText, CheckCircle, Clock, IndianRupee, TrendingUp, BarChart2, Calendar } from 'lucide-react';
 import StatCard from './StatCard';
 import { Link } from 'react-router-dom';
 
@@ -8,7 +8,11 @@ const TeamLeadDashboard = () => {
     const { users, leads, currentUser } = useApp();
 
     // Filter leads assigned to this Team Lead or their team
-    const myTeamLeads = leads.filter(l => {
+    // --- DATE FILTER ---
+    const [selectedMonth, setSelectedMonth] = React.useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+
+    // Filter leads assigned to this Team Lead or their team
+    const myTeamLeadsRaw = leads.filter(l => {
         // If explicitly assigned to TL
         if (l.assignedTo === currentUser?.id) return true;
 
@@ -16,6 +20,9 @@ const TeamLeadDashboard = () => {
         const assignedUser = users.find(u => u.id === l.assignedTo);
         return assignedUser?.reportsTo === currentUser?.id;
     });
+
+    // Apply Date Filter
+    const myTeamLeads = myTeamLeadsRaw.filter(l => l.createdAt.startsWith(selectedMonth));
 
     // --- METRICS ---
 
@@ -58,16 +65,27 @@ const TeamLeadDashboard = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex justify-between items-end">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Team Lead Dashboard</h1>
-                    <p className="text-slate-500">Performance Overview & Financials</p>
+                    <p className="text-slate-500">Performance Summary for <span className="font-semibold text-slate-700">{new Date(selectedMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</span></p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg border border-emerald-100 shadow-sm">
-                    <IndianRupee size={20} />
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider">Total Disbursal Value</p>
-                        <p className="text-xl font-bold">{formatCurrency(totalDisbursedValue)}</p>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-slate-400" />
+                        <input
+                            type="month"
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg border border-emerald-100 shadow-sm">
+                        <IndianRupee size={20} />
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider">Total Disbursal</p>
+                            <p className="text-xl font-bold">{formatCurrency(totalDisbursedValue)}</p>
+                        </div>
                     </div>
                 </div>
             </div>

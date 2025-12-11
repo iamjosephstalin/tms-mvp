@@ -1,1 +1,90 @@
-/* CSS moved to index.html for Tailwind CDN */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    *,
+    ::after,
+    ::before {
+        @apply border-border;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2;
+    }
+
+    .btn-primary {
+        @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm border border-transparent;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-zinc-900 border border-input hover:bg-zinc-50 shadow-sm;
+    }
+
+    .btn-danger {
+        @apply bg-red-600 text-white hover:bg-red-700 shadow-sm border border-transparent;
+    }
+
+    .btn-ghost {
+        @apply hover:bg-zinc-100 hover:text-zinc-900 text-zinc-600;
+    }
+
+    .btn-lg {
+        @apply h-10 px-8 text-base;
+    }
+
+    .btn-sm {
+        @apply h-8 rounded-md px-3 text-xs;
+    }
+
+    .btn-icon {
+        @apply h-9 w-9 p-0;
+    }
+}
+
+@layer utilities {
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        @apply bg-zinc-200 rounded-full hover:bg-zinc-300;
+    }
+
+    .glass {
+        @apply bg-white/80 backdrop-blur-md border-b border-border;
+    }
+}
+
+/* Global Table Reset */
+table {
+    @apply w-full caption-bottom text-sm;
+}
+
+thead tr {
+    @apply border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted;
+}
+
+th {
+    @apply h-10 px-4 text-left align-middle font-medium text-muted-foreground uppercase tracking-wider text-[11px];
+}
+
+td {
+    @apply p-4 align-middle [&:has([role=checkbox])]:pr-0 border-b border-zinc-50;
+}
+
+tr {
+    @apply hover:bg-muted/50;
+}

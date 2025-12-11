@@ -128,7 +128,7 @@ const LeadDetails = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-      <button onClick={() => navigate(-1)} className="flex items-center text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium">
+      <button onClick={() => navigate(-1)} className="btn btn-ghost btn-sm pl-0 hover:pl-2 transition-all">
         <ArrowLeft size={16} className="mr-2" /> Back to List
       </button>
 
@@ -175,7 +175,7 @@ const LeadDetails = () => {
             <div className="w-px bg-slate-200 mx-1"></div>
             <button
               onClick={() => setIsCallModalOpen(true)}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-2 shadow-sm transition-all hover:shadow hover:-translate-y-0.5"
+              className="btn btn-primary flex items-center gap-2"
               title="Call Customer"
             >
               <Phone size={18} /> <span className="hidden sm:inline">Call</span>
@@ -209,7 +209,7 @@ const LeadDetails = () => {
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">Reason</label>
                 <input required type="text" placeholder="e.g. Call back for income proof" className="border border-slate-300 rounded-md px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setFuReason(e.target.value)} />
               </div>
-              <button type="submit" className="bg-slate-900 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors">
+              <button type="submit" className="btn btn-primary">
                 Save Schedule
               </button>
             </form>
@@ -325,7 +325,7 @@ const LeadDetails = () => {
                         {doc.status === 'pending' && (
                           <button
                             onClick={() => updateDocumentStatus(lead.id, doc.id, 'uploaded')}
-                            className="text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                            className="btn btn-secondary text-blue-600 hover:bg-blue-50 h-8 px-3 gap-2"
                           >
                             <Upload size={14} /> Upload
                           </button>
@@ -389,7 +389,7 @@ const LeadDetails = () => {
                                   updateLoanDetails(lead.id, { pdStatus: 'completed' });
                                   addRemark(lead.id, { comment: 'PD Completed', disposition: 'System Update' });
                                 }}
-                                className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
+                                className="btn btn-primary"
                               >
                                 Mark PD Completed
                               </button>
@@ -479,7 +479,7 @@ const LeadDetails = () => {
                                 <input name="bankCode" type="text" required placeholder="e.g. HDFC001" className="w-full border rounded px-3 py-2 text-sm" />
                               </div>
                               <div className="md:col-span-3 pt-2">
-                                <button type="submit" className="w-full bg-blue-900 text-white font-bold py-2 rounded hover:bg-blue-800 shadow-md transition-colors">
+                                <button type="submit" className="w-full btn btn-primary font-bold shadow-md">
                                   Confirm Disbursal
                                 </button>
                               </div>
@@ -570,7 +570,7 @@ const LeadDetails = () => {
                       }
                     }}
                     disabled={!lead.documents.every(d => d.status === 'verified')}
-                    className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+                    className="btn btn-primary px-6"
                   >
                     Create Loan Application
                   </button>

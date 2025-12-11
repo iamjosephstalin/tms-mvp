@@ -164,8 +164,8 @@ const LeadAssignment = () => {
         <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col h-screen overflow-hidden">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Lead Assignment</h1>
-                    <p className="text-gray-500">Upload bulk leads and assign to your team.</p>
+                    <h1 className="text-2xl font-bold text-slate-900">Lead Assignment</h1>
+                    <p className="text-slate-500">Upload bulk leads and assign to your team.</p>
                 </div>
             </div>
 
@@ -174,14 +174,14 @@ const LeadAssignment = () => {
                 <nav className="-mb-px flex space-x-8">
                     <button
                         onClick={() => setActiveTab('unassigned')}
-                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'unassigned' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'unassigned' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-gray-700'
                             }`}
                     >
                         Unassigned / Upload
                     </button>
                     <button
                         onClick={() => setActiveTab('assigned')}
-                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assigned' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assigned' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-gray-700'
                             }`}
                     >
                         Assigned Leads
@@ -198,11 +198,11 @@ const LeadAssignment = () => {
                             <div className="p-4 bg-blue-50 rounded-full mb-4">
                                 <Upload className="text-blue-600" size={28} />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-1">Upload Leads Excel</h3>
-                            <p className="text-sm text-gray-500 mb-6 max-w-sm">Support .xlsx, .csv files. Drag and drop or click to upload bulk leads.</p>
+                            <h3 className="text-lg font-medium text-slate-900 mb-1">Upload Leads Excel</h3>
+                            <p className="text-sm text-slate-500 mb-6 max-w-sm">Support .xlsx, .csv files. Drag and drop or click to upload bulk leads.</p>
                             <div className="flex items-center gap-3">
                                 <label className="cursor-pointer">
-                                    <span className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-shadow shadow-sm shadow-blue-200">
+                                    <span className="btn btn-primary shadow-blue-200">
                                         {uploadStatus === 'uploading' ? 'Uploading...' : 'Choose File'}
                                     </span>
                                     <input type="file" className="hidden" accept=".xlsx,.csv" onChange={handleFileUpload} disabled={uploadStatus === 'uploading'} />
@@ -229,7 +229,7 @@ const LeadAssignment = () => {
                                     <button
                                         onClick={handleAssign}
                                         disabled={!selectedTelecaller}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+                                        className="btn btn-primary flex items-center gap-2"
                                     >
                                         <UserPlus size={16} />
                                         Assign
@@ -241,7 +241,7 @@ const LeadAssignment = () => {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm text-gray-600">
-                                    <thead className="bg-gray-50 text-gray-900 font-semibold border-b">
+                                    <thead className="bg-gray-50 text-slate-900 font-semibold border-b">
                                         <tr>
                                             <th className="p-4 w-10">
                                                 <button onClick={toggleSelectAll} className="flex items-center justify-center text-gray-400 hover:text-gray-600">
@@ -266,8 +266,8 @@ const LeadAssignment = () => {
                                                             {selectedLeads.includes(lead.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
                                                         </button>
                                                     </td>
-                                                    <td className="p-4 font-medium text-gray-900">{lead.name}</td>
-                                                    <td className="p-4 text-gray-500">{lead.mobile}</td>
+                                                    <td className="p-4 font-medium text-slate-900">{lead.name}</td>
+                                                    <td className="p-4 text-slate-500">{lead.mobile}</td>
                                                     <td className="p-4">{lead.city}</td>
                                                     <td className="p-4"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs border border-gray-200">{lead.source}</span></td>
                                                     <td className="p-4">{new Date(lead.createdAt).toLocaleDateString()}</td>
@@ -316,7 +316,7 @@ const LeadAssignment = () => {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm text-gray-600">
-                                    <thead className="bg-gray-50 text-gray-900 font-semibold border-b">
+                                    <thead className="bg-gray-50 text-slate-900 font-semibold border-b">
                                         <tr>
                                             <th className="p-4 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}>
                                                 Lead Name <SortIcon columnKey="name" />
@@ -341,7 +341,7 @@ const LeadAssignment = () => {
                                         ) : (
                                             paginatedLeads.map(lead => (
                                                 <tr key={lead.id} className="hover:bg-gray-50/50">
-                                                    <td className="p-4 font-medium text-gray-900">{lead.name}</td>
+                                                    <td className="p-4 font-medium text-slate-900">{lead.name}</td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-2">
                                                             <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
@@ -360,7 +360,7 @@ const LeadAssignment = () => {
                                                         </span>
                                                     </td>
                                                     <td className="p-4">{lead.city}</td>
-                                                    <td className="p-4 max-w-xs truncate text-gray-500">
+                                                    <td className="p-4 max-w-xs truncate text-slate-500">
                                                         {lead.remarks.length > 0 ? lead.remarks[lead.remarks.length - 1].comment : '-'}
                                                     </td>
                                                 </tr>
@@ -373,21 +373,21 @@ const LeadAssignment = () => {
                             {/* Pagination Controls */}
                             {sortedLeads.length > 0 && (
                                 <div className="border-t border-gray-100 p-4 flex items-center justify-between bg-gray-50">
-                                    <span className="text-xs text-gray-500">
+                                    <span className="text-xs text-slate-500">
                                         Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, sortedLeads.length)} of {sortedLeads.length} entries
                                     </span>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage === 1}
-                                            className="p-1 px-3 border rounded-md bg-white text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="btn btn-secondary h-8 w-8 p-0"
                                         >
                                             <ChevronLeft size={16} />
                                         </button>
                                         <button
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage === totalPages}
-                                            className="p-1 px-3 border rounded-md bg-white text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="btn btn-secondary h-8 w-8 p-0"
                                         >
                                             <ChevronRight size={16} />
                                         </button>

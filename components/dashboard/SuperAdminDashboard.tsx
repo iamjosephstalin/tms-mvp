@@ -17,8 +17,14 @@ const SuperAdminDashboard = () => {
   const [selectedCity, setSelectedCity] = useState('All');
 
   // --- Filtering Logic ---
+  // --- DATE FILTER ---
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  // Also keeping dateRange for backward compat or specific chart overrides if needed, but primary filter is month now for dashboard consistency
+
+  // --- Filtering Logic ---
   const filteredLeads = leads.filter(l =>
-    selectedCity === 'All' || l.city === selectedCity
+    (selectedCity === 'All' || l.city === selectedCity) &&
+    l.createdAt.startsWith(selectedMonth)
   );
 
   // --- KPI METRICS ---
@@ -74,30 +80,24 @@ const SuperAdminDashboard = () => {
       {/* Top Header & Controls */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Executive Overview</h1>
-          <p className="text-gray-500">Org-wide intelligence, cost analysis, and SLA tracking.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Executive Overview</h1>
+          <p className="text-slate-500">Org-wide intelligence, cost analysis, and SLA tracking.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <div className="flex gap-2">
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              <select
-                value={dateRange}
-                onChange={e => setDateRange(e.target.value)}
-                className="pl-9 pr-8 py-2 border rounded-lg bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer"
-              >
-                <option value="today">Today</option>
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-                <option value="mtd">Month to Date</option>
-                <option value="ytd">Year to Date</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="pl-9 pr-4 py-2 border rounded-lg bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-slate-700"
+              />
             </div>
 
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <select
                 value={selectedCity}
                 onChange={e => setSelectedCity(e.target.value)}
@@ -108,7 +108,7 @@ const SuperAdminDashboard = () => {
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ const SuperAdminDashboard = () => {
 
         {/* Lead Source Performance */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Performance by Lead Source</h2>
+          <h2 className="text-lg font-bold text-slate-900 mb-6">Performance by Lead Source</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -171,7 +171,7 @@ const SuperAdminDashboard = () => {
 
         {/* SLA Tracking */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">SLA Compliance (First Contact)</h2>
+          <h2 className="text-lg font-bold text-slate-900 mb-6">SLA Compliance (First Contact)</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={slaData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -187,7 +187,7 @@ const SuperAdminDashboard = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-4 text-xs text-gray-500 mt-2">
+          <div className="flex justify-center gap-4 text-xs text-slate-500 mt-2">
             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Excellent</span>
             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Good</span>
             <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500"></div> Breached</span>
@@ -196,7 +196,7 @@ const SuperAdminDashboard = () => {
 
         {/* Global Monthly Funnel */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Org-Wide Lead Pipeline</h2>
+          <h2 className="text-lg font-bold text-slate-900 mb-6">Org-Wide Lead Pipeline</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart

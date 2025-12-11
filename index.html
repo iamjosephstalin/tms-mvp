@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TMS - Telecalling Management System</title>
+  <title>DialFi - Telecalling Management System</title>
 
   <!-- Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +64,29 @@
         }
         *, ::after, ::before {
           @apply border-border;
+        }
+      }
+      @layer components {
+        .btn {
+          @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 cursor-pointer;
+        }
+        .btn-primary {
+          @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm border border-transparent;
+        }
+        .btn-secondary {
+          @apply bg-white text-zinc-900 border border-input hover:bg-zinc-50 shadow-sm;
+        }
+        .btn-danger {
+          @apply bg-red-600 text-white hover:bg-red-700 shadow-sm border border-transparent;
+        }
+        .btn-ghost {
+          @apply hover:bg-zinc-100 hover:text-zinc-900 text-zinc-600;
+        }
+        .btn-sm {
+          @apply h-8 rounded-md px-3 text-xs;
+        }
+        .btn-icon {
+          @apply h-8 w-8 p-0;
         }
       }
       @layer utilities {
