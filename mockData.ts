@@ -8,9 +8,10 @@ const getRandomDate = (daysAgo: number) => {
   return date.toISOString();
 };
 
-// Helper to generate random time today
-const getTimeToday = (hour: number) => {
+// Helper to generate random time today (between 9 AM and 6 PM)
+const getTimeToday = (baseHour?: number) => {
   const date = new Date();
+  const hour = baseHour !== undefined ? baseHour : 9 + Math.floor(Math.random() * 9); // Random hour 9-18
   date.setHours(hour, Math.floor(Math.random() * 60), 0, 0);
   return date.toISOString();
 };
@@ -65,12 +66,13 @@ const generateMockLeads = (count: number): Lead[] => {
 
     // Generate Remarks
     const remarks: Remark[] = [];
-    const numRemarks = Math.floor(Math.random() * 5);
+    const numRemarks = Math.floor(Math.random() * 5); // 0-4 remarks
     for (let j = 0; j < numRemarks; j++) {
-      const isRemarkToday = isToday && j === 0;
+      const isRemarkToday = isToday && j === (numRemarks - 1); // Latest remark is today
+      // Distribute calls roughly every 2 hours if multiple today, else random past date
       remarks.push({
         id: `r-${i}-${j}`,
-        timestamp: isRemarkToday ? getTimeToday(9 + j) : getRandomDate(Math.floor(Math.random() * 10) + 1),
+        timestamp: isRemarkToday ? getTimeToday() : getRandomDate(Math.floor(Math.random() * 10) + 1),
         userId: assignedTo || 'u3',
         userName: MOCK_USERS.find(u => u.id === assignedTo)?.name || 'Unknown',
         comment: 'Customer asked for callback regarding interest rate.',

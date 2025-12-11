@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Users, FileText, CheckCircle, Clock, IndianRupee, TrendingUp, BarChart2, Calendar, Activity } from 'lucide-react';
+import { Users, FileText, CheckCircle, Clock, IndianRupee, TrendingUp, BarChart2, Calendar, Activity, AlertTriangle, Phone } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 import StatCard from './StatCard';
 import { Link } from 'react-router-dom';
@@ -261,7 +261,75 @@ const TeamLeadDashboard = () => {
                     </table>
                 </div>
             </div>
-        </div>
+
+            {/* Agent Productivity Monitor (WFH) */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <Activity size={20} className="text-orange-500" /> Live Agent Monitor
+                    </h3>
+                    <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Real-time Activity</span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* 1. Hourly Activity Heatmap */}
+                    <div className="h-64">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-4">Activity Heatmap (Today)</h4>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={
+                                Array.from({ length: 9 }, (_, i) => {
+                                    const hour = 9 + i; // 9 AM to 5 PM
+                                    return {
+                                        hour: `${hour}:00`,
+                                        calls: teamReport.reduce((acc, agent) => {
+                                            // Mock logic: Distribute total calls across hours based on mock randomness
+                                            // In real app, we filter 'remarks' by timestamp hour
+                                            // For now, simulating 'active' hours
+                                            return acc + Math.floor(agent.calls * (Math.random() * 0.2));
+                                        }, 0)
+                                    };
+                                })
+                            } margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="hour" fontSize={11} />
+                                <YAxis fontSize={11} />
+                                <Tooltip cursor={{ fill: 'transparent' }} />
+                                <Bar dataKey="calls" fill="#f97316" radius={[4, 4, 0, 0]} barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* 2. Live Activity Feed & Idle Alerts */}
+                    <div className="flex flex-col h-64">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-4">Live Feed & Alerts</h4>
+                        <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2">
+                            {/* Mock Idle Alert */}
+                            <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-3 animate-pulse">
+                                <div className="p-2 bg-white rounded-full text-red-500"><AlertTriangle size={16} /></div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-900">High Idle Time: Anitha Krishnan</p>
+                                    <p className="text-xs text-red-600">No activity for 55 minutes</p>
+                                </div>
+                            </div>
+
+                            {/* Mock Live Actions */}
+                            {[1, 2, 3].map((_, i) => (
+                                <div key={i} className="p-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center gap-3">
+                                    <div className="p-2 bg-white rounded-full text-blue-500"><Phone size={14} /></div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-slate-700">
+                                            <span className="font-bold text-slate-900">Karthik Raja</span> updated status to <span className="font-semibold text-blue-600">Interested</span>
+                                        </p>
+                                        <p className="text-xs text-slate-400">Just now</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div >
     );
 };
 
