@@ -21,6 +21,7 @@ export interface User {
   status: 'active' | 'inactive';
   reportsTo?: string; // ID of the Team Lead (Admin)
   monthlyTarget?: number; // KRA: Target conversions per month
+  lastActive?: string; // ISO Timestamp
 }
 
 export interface Remark {
@@ -52,10 +53,17 @@ export interface DocumentItem {
 export interface LoanDetail {
   appId: string;
   amount: number;
+  loanType: 'Personal Loan' | 'Home Loan' | 'Business Loan' | 'Car Loan';
   pdStatus: 'pending' | 'completed';
   sanctionStatus: 'pending' | 'sanctioned' | 'rejected';
   sanctionAmount?: number;
   disbursalStatus: 'pending' | 'completed';
+
+  // Timestamps for Analytics
+  docSubmissionDate?: string;
+  pdDate?: string;
+  sanctionDate?: string;
+  disbursalDate?: string;
 
   // New Fields for Disbursal
   pif?: number;
@@ -90,5 +98,4 @@ export interface Lead {
   salary?: number;
   address?: string;
   pincode?: string;
-  requestedLoanAmount?: number;
 }

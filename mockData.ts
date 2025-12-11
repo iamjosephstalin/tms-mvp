@@ -15,12 +15,12 @@ const getTimeToday = (hour: number) => {
   return date.toISOString();
 };
 export const MOCK_USERS: User[] = [
-  { id: 'u0', name: 'Vikram Kumar', email: 'vikram@tms.com', role: 'superadmin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram', status: 'active' },
-  { id: 'u1', name: 'Rajesh Kumar', email: 'rajesh@tms.com', role: 'superadmin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh', status: 'active' },
-  { id: 'u2', name: 'Priya Sundar', email: 'priya@tms.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya', status: 'active', monthlyTarget: 50 },
-  { id: 'u3', name: 'Karthik Raja', email: 'karthik@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Karthik', status: 'active', reportsTo: 'u2', monthlyTarget: 15 },
-  { id: 'u4', name: 'Anitha Krishnan', email: 'anitha@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anitha', status: 'active', reportsTo: 'u2', monthlyTarget: 20 },
-  { id: 'u5', name: 'Senthil Balaji', email: 'senthil@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Senthil', status: 'active', reportsTo: 'u2', monthlyTarget: 12 },
+  { id: 'u0', name: 'Vikram Kumar', email: 'vikram@tms.com', role: 'superadmin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram', status: 'active', lastActive: new Date().toISOString() },
+  { id: 'u1', name: 'Rajesh Kumar', email: 'rajesh@tms.com', role: 'superadmin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh', status: 'active', lastActive: getRandomDate(1) },
+  { id: 'u2', name: 'Priya Sundar', email: 'priya@tms.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya', status: 'active', monthlyTarget: 50, lastActive: new Date().toISOString() },
+  { id: 'u3', name: 'Karthik Raja', email: 'karthik@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Karthik', status: 'active', reportsTo: 'u2', monthlyTarget: 15, lastActive: new Date().toISOString() },
+  { id: 'u4', name: 'Anitha Krishnan', email: 'anitha@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anitha', status: 'active', reportsTo: 'u2', monthlyTarget: 20, lastActive: getTimeToday(10) },
+  { id: 'u5', name: 'Senthil Balaji', email: 'senthil@tms.com', role: 'telecaller', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Senthil', status: 'active', reportsTo: 'u2', monthlyTarget: 12, lastActive: getRandomDate(2) },
 ];
 
 const STATUSES = ['new', 'in-progress', 'follow-up', 'docs-pending', 'docs-submitted', 'application', 'sanctioned', 'rejected', 'disbursed', 'not-interested'] as const;
@@ -44,6 +44,24 @@ const generateMockLeads = (count: number): Lead[] => {
 
     // Generate Indian Mobile
     const mobile = `+91 ${Math.floor(Math.random() * 4 + 6)}${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
+
+    // Generate Timestamps based on status (Mock Logic)
+    const createdAt = getRandomDate(Math.floor(Math.random() * 30));
+    let docSubmissionDate, pdDate, sanctionDate, disbursalDate;
+
+    if (['docs-submitted', 'application', 'sanctioned', 'disbursed'].includes(status)) {
+      docSubmissionDate = getRandomDate(Math.floor(Math.random() * 10)); // 0-10 days ago
+    }
+    if (['application', 'sanctioned', 'disbursed'].includes(status)) {
+      pdDate = getRandomDate(Math.floor(Math.random() * 5)); // 0-5 days ago
+    }
+    if (['sanctioned', 'disbursed'].includes(status)) {
+      sanctionDate = getRandomDate(Math.floor(Math.random() * 3)); // 0-3 days ago
+    }
+    if (status === 'disbursed') {
+      disbursalDate = getRandomDate(0); // Today/Yesterday
+    }
+
 
     // Generate Remarks
     const remarks: Remark[] = [];
@@ -82,7 +100,8 @@ const generateMockLeads = (count: number): Lead[] => {
       status: status,
       assignedTo: assignedTo,
       source: SOURCES[Math.floor(Math.random() * SOURCES.length)],
-      createdAt: getRandomDate(Math.floor(Math.random() * 30)),
+      createdAt: createdAt,
+      pincode: `600${Math.floor(Math.random() * 900 + 100)}`, // Chennai Pincodes approx
       remarks,
       followups,
       documents: status === 'new' ? [] : [
@@ -96,7 +115,12 @@ const generateMockLeads = (count: number): Lead[] => {
         pdStatus: ['pending', 'completed'][Math.floor(Math.random() * 2)] as any,
         sanctionStatus: status === 'sanctioned' || status === 'disbursed' ? 'sanctioned' : 'pending',
         disbursalStatus: status === 'disbursed' ? 'completed' : 'pending',
-        sanctionAmount: Math.floor(Math.random() * 45) * 10000 + 50000
+        sanctionAmount: Math.floor(Math.random() * 45) * 10000 + 50000,
+        loanType: ['Personal Loan', 'Home Loan', 'Business Loan'][Math.floor(Math.random() * 3)] as any,
+        docSubmissionDate,
+        pdDate,
+        sanctionDate,
+        disbursalDate
       }
     });
   }

@@ -147,83 +147,62 @@ const CreateLeadModal = ({ onClose }: { onClose: () => void }) => {
 
 const TelecallerDashboard = () => {
   const { currentUser, leads } = useApp();
+  const [isLeadModalOpen, setIsLeadModalOpen] = React.useState(false);
 
   if (!currentUser) return null;
 
   const myLeads = leads.filter(l => l.assignedTo === currentUser.id);
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // --- METRICS CALCULATION ---
-  // 1. New Stats Requirements: Schedule, Assigned, Daily Leads, Actioned vs Unactioned
-
-  // Today's Follow-ups/Tasks
-  const todaysTasks = myLeads.filter(l =>
-    l.followups.some(f => f.status === 'pending' && f.date === todayStr)
-  );
-
-  // Total Assigned (from requirement)
-  const totalAssigned = myLeads.length;
-
-  // Daily Leads (Leads created today)
-  const dailyLeads = myLeads.filter(l => l.createdAt.startsWith(todayStr)).length;
-
-  // Actioned vs Unactioned Calls (Today)
-  // Actioned = Remarks added today OR Status changed today (Simplification: Remarks with today's date)
-  const actionedLeadsToday = myLeads.filter(l =>
-    l.remarks.some(r => r.timestamp.startsWith(todayStr))
-  ).length;
-
-  const unactionedLeadsToday = totalAssigned - actionedLeadsToday;
-
-  // --- RESTORED METRICS FOR CHARTS ---
-  // 1. Follow-ups (Required for list)
-  const todaysFollowups = myLeads.filter(l =>
-    l.followups.some(f => f.status === 'pending' && f.date === todayStr)
-  );
-
-  const missedFollowups = myLeads.filter(l =>
-    l.followups.some(f => f.status === 'pending' && f.date < todayStr)
-  );
-
-  // 2. Conversion (Required for Chart)
-  const conversions = myLeads.filter(l => ['sanctioned', 'disbursed'].includes(l.status)).length;
-
-  // 3. Productivity Stats (For Graphs)
-  const totalCalls = myLeads.reduce((acc, l) => acc + l.remarks.length, 0);
-  const totalDuration = myLeads.reduce((acc, l) => acc + l.remarks.reduce((s, r) => s + (r.duration || 0), 0), 0);
-  const avgDuration = totalCalls > 0 ? Math.floor(totalDuration / totalCalls) : 0;
-
-  // 4. Connection Data (For Bar Chart)
-  const connectedCount = myLeads.flatMap(l => l.remarks).filter(r => r.disposition === 'Connected' || r.disposition === 'Interested').length;
-  const notConnectedCount = totalCalls - connectedCount;
-
-  const connectionData = [
-    { name: 'Connected', value: connectedCount },
-    { name: 'Not Connected', value: notConnectedCount },
-  ];
-
-  // 5. Target Data (For Target Card)
-  const monthlyTarget = currentUser.monthlyTarget || 30;
-  const achievements = conversions;
-  const achievementPct = Math.min(Math.round((achievements / monthlyTarget) * 100), 100);
-
-  // Lead Modal State
-  const [isLeadModalOpen, setIsLeadModalOpen] = React.useState(false);
-
   // --- DATE FILTER ---
   const [selectedMonth, setSelectedMonth] = React.useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
-
   const filteredMyLeads = myLeads.filter(l => l.createdAt.startsWith(selectedMonth));
-  const completedLeads = myLeads.filter(l => ['sanctioned', 'disbursed'].includes(l.status)); // Define completedLeads
-  const filteredCompletedLeads = completedLeads.filter(l => l.createdAt.startsWith(selectedMonth));
-  const allFollowups = myLeads.flatMap(lead => lead.followups.map(f => ({ ...f, leadName: lead.name, leadId: lead.id }))); // Define allFollowups
-  const filteredFollowups = allFollowups.filter(f => f.date.startsWith(selectedMonth));
 
-  // Update Metrics based on filtered data
-  const totalCallsFiltered = filteredMyLeads.reduce((acc, lead) => acc + lead.remarks.length, 0); // Mock approximation
-  const pendingFollowupsCount = filteredFollowups.filter(f => f.status === 'pending').length; // Corrected to use filteredFollowups
-  const docsPendingCount = filteredMyLeads.filter(l => l.status === 'docs-pending').length;
-  const earnings = filteredCompletedLeads.length * 500; // Mock incentive
+  // --- ADVANCED ANALYTICS CALCULATION ---
+  // A. Productivity KPIs
+  const leadsAssignedToday = myLeads.filter(l => l.createdAt.startsWith(todayStr)).length;
+  const callsMadeToday = myLeads.reduce((acc, l) => acc + l.remarks.filter(r => r.timestamp.startsWith(todayStr)).length, 0);
+  const connectedCallsToday = myLeads.reduce((acc, l) => acc + l.remarks.filter(r => r.timestamp.startsWith(todayStr) && ['Connected', 'Interested'].includes(r.disposition)).length, 0);
+  const connectionRatio = callsMadeToday > 0 ? ((connectedCallsToday / callsMadeToday) * 100).toFixed(1) : '0';
+
+  // Missing Variables Definitions
+  const totalAssigned = myLeads.length;
+  const dailyLeads = leadsAssignedToday; // Alias
+  const actionedLeadsToday = myLeads.filter(l => l.remarks.some(r => r.timestamp.startsWith(todayStr))).length;
+  const unactionedLeadsToday = myLeads.filter(l => !l.remarks.some(r => r.timestamp.startsWith(todayStr))).length;
+  const filteredCompletedLeads = filteredMyLeads.filter(l => ['sanctioned', 'disbursed'].includes(l.status));
+
+  // Avg Call Handling Time (Overall)
+  const totalCallsAllTime = myLeads.reduce((acc, l) => acc + l.remarks.length, 0);
+  const totalDurationAllTime = myLeads.reduce((acc, l) => acc + l.remarks.reduce((s, r) => s + (r.duration || 0), 0), 0);
+  const avgCallDuration = totalCallsAllTime > 0 ? Math.floor(totalDurationAllTime / totalCallsAllTime) : 0; // in seconds
+
+  // Disposition Breakdown (For Pie Chart) - Filtered by Month
+  const dispositionCounts = filteredMyLeads.reduce<Record<string, number>>((acc, l) => {
+    l.remarks.forEach(r => {
+      acc[r.disposition] = (acc[r.disposition] || 0) + 1;
+    });
+    return acc;
+  }, {});
+  const dispositionData = Object.entries(dispositionCounts).map(([name, value]) => ({ name, value }));
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+
+  // B. Lead Progress KPIs
+  const interestedLeadsCount = filteredMyLeads.filter(l => l.remarks.some(r => r.disposition === 'Interested')).length;
+  const docsSubmittedCount = filteredMyLeads.filter(l => ['docs-submitted', 'application', 'sanctioned', 'disbursed'].includes(l.status)).length;
+  const dropOffCount = filteredMyLeads.filter(l => ['rejected', 'not-interested'].includes(l.status)).length;
+
+  // C. Conversion KPIs
+  const docsSubmissionRate = totalAssigned > 0 ? ((docsSubmittedCount / totalAssigned) * 100).toFixed(1) : '0';
+  const leadToAppConversion = interestedLeadsCount > 0 ? ((filteredMyLeads.filter(l => ['application', 'sanctioned', 'disbursed'].includes(l.status)).length / interestedLeadsCount) * 100).toFixed(1) : '0';
+
+  // D. Task Tracking
+  const todaysFollowupsList = myLeads.filter(l => l.followups.some(f => f.status === 'pending' && f.date === todayStr));
+  const pendingFollowupsList = myLeads.filter(l => l.followups.some(f => f.status === 'pending' && f.date < todayStr));
+  const upcomingFollowupsList = myLeads.filter(l => l.followups.some(f => f.status === 'pending' && f.date > todayStr)).slice(0, 5);
+
+  const todaysTasks = todaysFollowupsList; // Alias for UI compatibility
+
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
@@ -251,164 +230,244 @@ const TelecallerDashboard = () => {
         <ListTodo size={18} /> Create New Lead
       </button>
 
-      {/* KPI Cards: Schedule, Assigned, Daily Leads, Actioned/Unactioned */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Today's Tasks"
-          value={todaysTasks.length}
-          icon={ListTodo}
-          color="bg-blue-100 text-blue-600"
-          subtext="Scheduled Follow-ups"
-        />
-        <StatCard
-          title="Total Assigned"
-          value={totalAssigned}
-          icon={Users}
-          color="bg-purple-100 text-purple-600"
-          subtext={`${dailyLeads} new leads today`}
-        />
-        <StatCard
-          title="Actioned Today"
-          value={actionedLeadsToday}
-          icon={PhoneCall}
-          color="bg-green-100 text-green-600"
-          subtext="Calls/Updates Made"
-        />
-        <StatCard
-          title="Unactioned"
-          value={unactionedLeadsToday}
-          icon={AlertCircle}
-          color="bg-red-100 text-red-600"
-          subtext="Pending Actions"
-        />
+      {/* Hero Command Center */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+
+          {/* 1. Daily Activity Ring */}
+          <div className="p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Target size={120} className="text-blue-500 transform rotate-12" />
+            </div>
+            <div className="relative w-40 h-40 mb-4">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="80" cy="80" r="70" fill="none" stroke="#f1f5f9" strokeWidth="12" />
+                <circle
+                  cx="80" cy="80" r="70" fill="none" stroke="#3b82f6" strokeWidth="12"
+                  strokeDasharray="440"
+                  strokeDashoffset={440 - (440 * Math.min(callsMadeToday / 50, 1))}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-black text-slate-900">{callsMadeToday}</span>
+                <span className="text-sm font-medium text-slate-400">of 50 Calls</span>
+              </div>
+            </div>
+            <div className="flex gap-4 text-sm">
+              <div className="flex flex-col items-center">
+                <span className="font-bold text-emerald-600">{connectionRatio}%</span>
+                <span className="text-slate-400 text-xs">Connected</span>
+              </div>
+              <div className="w-px h-8 bg-slate-200"></div>
+              <div className="flex flex-col items-center">
+                <span className="font-bold text-blue-600">{avgCallDuration}s</span>
+                <span className="text-slate-400 text-xs">Avg Duration</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Workload Pulse */}
+          <div className="p-8 flex flex-col justify-center space-y-6">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <ListTodo size={16} /> Workload Pulse
+            </h3>
+
+            <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100 transition-transform hover:scale-[1.02]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white rounded-full text-red-500 shadow-sm"><AlertCircle size={24} /></div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900">{pendingFollowupsList.length}</p>
+                  <p className="text-xs font-semibold text-red-600">Overdue Tasks</p>
+                </div>
+              </div>
+              <button
+                onClick={() => document.getElementById('tasks-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-xs font-bold text-red-500 hover:underline"
+              >
+                Resolve
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100 transition-transform hover:scale-[1.02]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white rounded-full text-blue-500 shadow-sm"><Calendar size={24} /></div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900">{todaysTasks.length}</p>
+                  <p className="text-xs font-semibold text-blue-600">Scheduled Today</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400">Un-actioned</p>
+                <p className="font-bold text-slate-700">{unactionedLeadsToday}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Pipeline Flow */}
+          <div className="p-8 flex flex-col justify-center">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+              <Target size={16} /> Lead Pipeline
+            </h3>
+            <div className="relative space-y-6">
+              {/* Step 1 */}
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200 font-bold">
+                  {totalAssigned}
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-slate-700">Assigned</span>
+                    <span className="text-slate-400">Total</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-300 w-full"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Connector Line */}
+              <div className="absolute left-5 top-5 bottom-5 w-0.5 bg-slate-100 -z-0"></div>
+
+              {/* Step 2 */}
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100 font-bold shadow-sm">
+                  {docsSubmittedCount}
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-indigo-900">Docs Submitted</span>
+                    <span className="text-indigo-500 font-bold">{docsSubmissionRate}%</span>
+                  </div>
+                  <div className="h-2 bg-indigo-50 rounded-full overflow-hidden">
+                    <div style={{ width: `${Math.min(Number(docsSubmissionRate), 100)}%` }} className="h-full bg-indigo-500 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 font-bold shadow-sm">
+                  {filteredCompletedLeads.length}
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-emerald-900">Converted</span>
+                    <span className="text-emerald-500 font-bold">{leadToAppConversion}%</span>
+                  </div>
+                  <div className="h-2 bg-emerald-50 rounded-full overflow-hidden">
+                    <div style={{ width: `${Math.min(Number(leadToAppConversion), 100)}%` }} className="h-full bg-emerald-500 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      {/* Create Lead Modal */}
-      {isLeadModalOpen && <CreateLeadModal onClose={() => setIsLeadModalOpen(false)} />}
-
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Charts Column */}
-        <div className="space-y-6">
-          {/* Connected vs Not Connected */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Connection Efficiency</h2>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={connectionData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{ fill: 'transparent' }} />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20}>
-                    {connectionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#ef4444'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Call Duration */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 font-semibold uppercase">Avg Talk Time</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {Math.floor(avgDuration / 60)}m {avgDuration % 60}s
-              </p>
-            </div>
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
-              <Clock size={24} />
-            </div>
-          </div>
-
-          {/* Monthly Target Card */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                <Target size={20} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-[500px]">
+        {/* Task Tracking List */}
+        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <ListTodo size={20} className="text-primary" /> Daily Focus
+          </h2>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+            {pendingFollowupsList.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-red-500 uppercase tracking-wider">Overdue ({pendingFollowupsList.length})</h3>
+                {pendingFollowupsList.map((l, i) => (
+                  <div key={i} className="p-3 bg-red-50 rounded-lg border border-red-100 flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{l.name}</p>
+                      <p className="text-xs text-red-600 flex items-center gap-1"><Clock size={10} /> {l.followups.find(f => f.status === 'pending')?.date}</p>
+                    </div>
+                    <Link to={`/leads/${l.id}`} className="p-2 bg-white rounded-full text-red-600 hover:shadow-sm"><Phone size={14} /></Link>
+                  </div>
+                ))}
               </div>
-              <span className={`text-xs font-bold px-2 py-1 rounded-full ${achievementPct >= 100 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                {achievementPct}%
-              </span>
-            </div>
-            <p className="text-slate-500 text-sm font-medium">Monthly Target</p>
-            <div className="flex items-end gap-2 mt-1">
-              <h3 className="text-2xl font-bold text-slate-900">{achievements} <span className="text-sm text-slate-400 font-normal">/ {monthlyTarget}</span></h3>
-            </div>
-            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-blue-600 rounded-full transition-all duration-1000" style={{ width: `${achievementPct}%` }}></div>
-            </div>
-          </div>
-
-          {/* Assigned Leads Card */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
-                <Users size={20} />
-              </div>
-            </div>
-            <p className="text-slate-500 text-sm font-medium">Assigned Leads</p>
-            <h3 className="text-2xl font-bold text-slate-900 mt-1">{myLeads.length}</h3>
-          </div>
-        </div>
-
-        {/* Follow-up List (Center - Wider) */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Calendar size={20} className="text-blue-500" /> Today's Schedule
-            </h2>
-            <div className="flex gap-2">
-              <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
-                {todaysFollowups.length} Today
-              </span>
-              {missedFollowups.length > 0 && (
-                <span className="text-xs font-semibold bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1">
-                  <AlertCircle size={12} /> {missedFollowups.length} Missed
-                </span>
+            )}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-blue-500 uppercase tracking-wider">Today ({todaysFollowupsList.length})</h3>
+              {todaysFollowupsList.length > 0 ? todaysFollowupsList.map((l, i) => (
+                <div key={i} className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{l.name}</p>
+                    <p className="text-xs text-blue-600 flex items-center gap-1"><Clock size={10} /> {l.followups.find(f => f.status === 'pending' && f.date === todayStr)?.time}</p>
+                  </div>
+                  <Link to={`/dashboard/leads/${l.id}`} className="p-2 bg-white rounded-full text-blue-600 hover:shadow-sm"><Phone size={14} /></Link>
+                </div>
+              )) : (
+                <p className="text-sm text-slate-400 italic">No scheduled tasks for today.</p>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            {[...missedFollowups, ...todaysFollowups].length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                <CheckCircle className="mx-auto text-gray-300 mb-2" size={32} />
-                <p className="text-gray-500">All caught up! No tasks pending.</p>
+        {/* Charts: Disposition & Connection */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+          <div className="flex justify-between mb-6">
+            <h2 className="text-lg font-bold text-slate-900">Call Analytics & Outcomes</h2>
+            <div className="flex gap-2 text-xs">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Calls</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Connected</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-[300px]">
+            {/* Pie Chart: Dispositions */}
+            <div className="h-full relative flex flex-col">
+              <h3 className="text-xs font-semibold text-slate-500 mb-2">Call Disposition (Month)</h3>
+              <div className="flex-1 min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={dispositionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {dispositionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '10px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            ) : (
-              [...missedFollowups, ...todaysFollowups].map(lead => {
-                // Determine if this is a missed or today item
-                const isMissed = missedFollowups.some(m => m.id === lead.id);
-                const fp = lead.followups.find(f => f.status === 'pending')!;
+            </div>
 
-                return (
-                  <div key={lead.id} className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isMissed ? 'bg-red-50 border-red-100' : 'bg-white border-gray-100 hover:border-blue-200'}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border ${isMissed ? 'bg-white text-red-600 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                        {lead.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h4 className={`font-semibold ${isMissed ? 'text-red-900' : 'text-gray-900'}`}>{lead.name}</h4>
-                        <p className={`text-xs flex items-center gap-1 mt-1 ${isMissed ? 'text-red-600' : 'text-gray-500'}`}>
-                          <Clock size={12} /> {isMissed ? 'Overdue: ' + fp.date : fp.time} • {fp.reason}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-xs font-semibold px-2 py-1 rounded ${isMissed ? 'bg-white text-red-600' : 'bg-gray-100 text-gray-600'}`}>
-                        {lead.status}
-                      </span>
-                      <Link to={`/leads/${lead.id}`} className="px-4 py-2 bg-white text-sm font-medium border border-gray-200 rounded-lg shadow-sm hover:border-blue-300 hover:text-blue-600 transition-all">
-                        Call
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            {/* Bar Chart: Activity Trend (Simulated) */}
+            <div className="h-full relative flex flex-col">
+              <h3 className="text-xs font-semibold text-slate-500 mb-2">Lead Flow Status</h3>
+              <div className="flex-1 min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={[
+                    { name: 'New', value: leadsAssignedToday },
+                    { name: 'Interested', value: interestedLeadsCount },
+                    { name: 'Docs', value: docsSubmittedCount },
+                    { name: 'Converted', value: filteredCompletedLeads.length }
+                  ]} margin={{ top: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" fontSize={11} />
+                    <YAxis fontSize={11} />
+                    <Tooltip cursor={{ fill: 'transparent' }} />
+                    <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={30}>
+                      <Cell fill="#3b82f6" />
+                      <Cell fill="#f59e0b" />
+                      <Cell fill="#8b5cf6" />
+                      <Cell fill="#10b981" />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </div>
       </div>
